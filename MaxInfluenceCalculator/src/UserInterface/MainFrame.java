@@ -4,18 +4,22 @@ import CoreCalculation.MainCalculate;
 import DataManager.DataManager;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Vector;
 
-public class MainFrame extends JFrame{
+public class MainFrame{
+    JFrame frame;
     //实例化的组件们，便于更新UI
     public File linksFile;
     public File nodesFile;
     public JProgressBar currentBar;
     public JProgressBar totalBar;
-    protected JList<?> influenceList;
+    public JTable influenceList;
+    public DefaultTableModel tableModel;
     protected JTextField linksFilePath;
     protected JTextField nodesFilePath;
     private JButton selectLinksFile;
@@ -38,6 +42,7 @@ public class MainFrame extends JFrame{
     //主窗口
     public MainFrame(String title)
     {
+        frame = new JFrame(title);
         setButtons();
         setTexts();
     }
@@ -45,6 +50,7 @@ public class MainFrame extends JFrame{
     //添加并显示组件
     public void Show()
     {
+
         JPanel_Ex workControl = new JPanel_Ex(new GridBagLayout()); //网袋布局
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -70,22 +76,27 @@ public class MainFrame extends JFrame{
         workControl.add(currentProcess, constraints, 3, 2,1,2);
         workControl.add(totalProcess, constraints, 3,4,1,2);
 
-        JPanel_Ex listPanel = new JPanel_Ex();
+
+        JPanel listPanel = new JPanel();
         JScrollPane listPane = new JScrollPane();
-        listPanel.add(listPane);
-        listPane.add(influenceList);
+        listPanel.add(listPane, BorderLayout.CENTER);
+        listPanel.add(influenceList.getTableHeader(), BorderLayout.NORTH);
+        listPanel.add(influenceList);
 
-        JSplitPane spilt = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        spilt.setDividerLocation(480);
-        add(spilt);
 
-        spilt.add(workControl);
-        spilt.add(listPanel);
+        JSplitPane spilt = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, workControl, listPanel);
+        //spilt.setDividerLocation(480);
 
-        this.setSize(600, 300);
-        this.setLocationRelativeTo(null);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setVisible(true);
+
+        //frame.setLayout(new GridLayout(1, 2));
+        //frame.getContentPane().add(workControl);
+        frame.getContentPane().add(spilt);
+        //frame.getContentPane().add(listPanel, BorderLayout.CENTER);
+
+        frame.setSize(600, 400);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
 
     }
 
@@ -125,7 +136,7 @@ public class MainFrame extends JFrame{
     //设置界面上的文本
     protected void setTexts()
     {
-        influenceList = new JList<String>();
+        influenceList = new JTable();
         linksFilePath = new JTextField();
         nodesFilePath = new JTextField();
         currentBar = new JProgressBar();
@@ -135,6 +146,12 @@ public class MainFrame extends JFrame{
         currentProcess = new JLabel("当前操作进度", JLabel.CENTER);
         totalProcess = new JLabel("总体操作进度", JLabel.CENTER);
 
+        Vector<String> tableHeader = new Vector<>();
+        tableHeader.add("节点");
+        tableHeader.add("影响力");
+        tableModel = new DefaultTableModel(tableHeader, 0);
+        influenceList.setModel(tableModel);
+        influenceList.setMinimumSize(new Dimension(400,400));
         linksFilePath.setEditable(false);
         nodesFilePath.setEditable(false);
         nodesFilePath.setEnabled(false);

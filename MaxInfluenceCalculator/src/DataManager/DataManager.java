@@ -76,13 +76,12 @@ public class DataManager{
         return 0;
     }
 
-    public synchronized HashMap<Integer, HashMapNode> getMap()
-    {
+    public synchronized HashMap<Integer, HashMapNode> getMap() throws FileNotFoundException {
         HashMap<Integer, HashMapNode> map = new HashMap<>();
         HashMapNode temp;
         AdjNode adjTemp;
         if (linksFileRaw == null)
-            return null;
+            throw new FileNotFoundException();
         //int size = linksFileRaw.size();
         String strline;
         String[] pairs;

@@ -4,6 +4,7 @@ import DataManager.DataManager;
 import DataManager.HashMapNode;
 import DataManager.VectorNode;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class SingleNodeCalculate extends Thread {
@@ -16,10 +17,16 @@ public class SingleNodeCalculate extends Thread {
     public SingleNodeCalculate(DataManager data, Vector final_result, Integer key)
     {
         data_ = data;
-        hm = data.getMap();
+        try {
+            hm = data.getMap();
+            keys = hm.keySet();
+        }catch (FileNotFoundException e)
+        {
+            hm = null;
+            keys = null;
+        }
         final_result_ = final_result;
         key_ = key;
-        keys = hm.keySet();
     }
 
     public void RestoreMap()
@@ -35,10 +42,14 @@ public class SingleNodeCalculate extends Thread {
         double influence = 0;
         for(int i=0; i<5000; i++)
         {
-            if(hm == null)
+            while(hm == null)
             {
-                System.err.println("missing map");
-                break;
+                try {
+                    hm = data_.getMap();
+                    keys = hm.keySet();
+                } catch (FileNotFoundException | NullPointerException e) {
+                    e.printStackTrace();
+                }
             }
             //HashMap<Integer, HashMapNode> hm = data_.getMap();
             Queue<HashMapNode> queue = new LinkedList<HashMapNode>();
@@ -53,7 +64,8 @@ public class SingleNodeCalculate extends Thread {
                 {
                     if(hm.get(k).adjNode.get(j).direction == 1)
                     {
-                        if(hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == 1
+                        if(hm.get(hm.get(k).adjNode.get(j).adjNodeKey) == null ||
+                                hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == 1
                                 || hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == -1)
                             break;
                         else
@@ -95,6 +107,7 @@ public class SingleNodeCalculate extends Thread {
             influence = influence + (infl / 5000);
             RestoreMap();
         }
+
         final_result_.add(new VectorNode(influence, key_));
         //final_result_.add(influence, key_);
         System.out.println("节点" + key_ + "的最大影响力为" + influence);
