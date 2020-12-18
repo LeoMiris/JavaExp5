@@ -33,6 +33,7 @@ public class MainFrame extends JFrame{
     //用于进行线程之间的通信
     public MainFrameThread t = new MainFrameThread(this);
     public DataManager data_ = new DataManager();
+    MainCalculate mc = new MainCalculate(this);
 
     //主窗口
     public MainFrame(String title)
@@ -214,7 +215,9 @@ public class MainFrame extends JFrame{
             final SwingWorker worker = new SwingWorker() {
                 @Override
                 protected Object doInBackground() throws Exception {
-                    MainCalculate mc = new MainCalculate(data_);
+                    totalBar.setMaximum(data_.getMap().size());
+                    currentBar.setIndeterminate(true);
+                    mc.setData_(data_);
                     mc.start();
                     return null;
                 }

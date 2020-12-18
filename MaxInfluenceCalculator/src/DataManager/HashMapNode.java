@@ -6,4 +6,9 @@ public class HashMapNode {
     public int nodeKey = -1;
     public int activated = 0;
     public Vector<AdjNode> adjNode;
+
+    public HashMapNode()
+    {
+        adjNode = new Vector<>();
+    }
 }
