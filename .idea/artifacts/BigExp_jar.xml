@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="BigExp:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BigExp_jar</output-path>
+    <root id="archive" name="BigExp.jar">
+      <element id="module-output" name="BigExp" />
+    </root>
+  </artifact>
+</component>
