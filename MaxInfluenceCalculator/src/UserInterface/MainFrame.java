@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.Vector;
 
 public class MainFrame{
-    JFrame frame;
+    public JFrame frame;
     //实例化的组件们，便于更新UI
     public File linksFile;
     public File nodesFile;
@@ -22,20 +22,21 @@ public class MainFrame{
     public DefaultTableModel tableModel;
     protected JTextField linksFilePath;
     protected JTextField nodesFilePath;
-    private JButton selectLinksFile;
-    private JButton selectNodesFile;
-    private JButton startButton;
-    private JButton pauseButton;
-    private JButton stopButton;
-    private JRadioButton linkMode;
-    private JRadioButton nodeMode;
+    public JButton selectLinksFile;
+    public JButton selectNodesFile;
+    public JButton startButton;
+    public JButton pauseButton;
+    public JButton stopButton;
+    public ButtonGroup dataMode;
+    public JRadioButton linkMode;
+    public JRadioButton nodeMode;
     private JLabel linkFilePath;
     private JLabel nodeFilePath;
     private JLabel currentProcess;
     private JLabel totalProcess;
 
     //用于进行线程之间的通信
-    public MainFrameThread t = new MainFrameThread(this);
+    //public MainFrameThread t = new MainFrameThread(this);
     public DataManager data_ = new DataManager();
     MainCalculate mc = new MainCalculate(this);
 
@@ -77,20 +78,20 @@ public class MainFrame{
         workControl.add(totalProcess, constraints, 3,4,1,2);
 
 
-        JPanel listPanel = new JPanel();
-        JScrollPane listPane = new JScrollPane();
-        listPanel.add(listPane, BorderLayout.CENTER);
-        listPanel.add(influenceList.getTableHeader(), BorderLayout.NORTH);
-        listPanel.add(influenceList);
+        //JPanel listPanel = new JPanel();
+        //JScrollPane listPane = new JScrollPane();
+        //listPanel.add(listPane, BorderLayout.CENTER);
+        //listPanel.add(influenceList.getTableHeader(), BorderLayout.NORTH);
+        //listPanel.add(influenceList);
 
 
-        JSplitPane spilt = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, workControl, listPanel);
+        //JSplitPane spilt = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, workControl, listPanel);
         //spilt.setDividerLocation(480);
 
 
         //frame.setLayout(new GridLayout(1, 2));
         //frame.getContentPane().add(workControl);
-        frame.getContentPane().add(spilt);
+        frame.getContentPane().add(workControl);
         //frame.getContentPane().add(listPanel, BorderLayout.CENTER);
 
         frame.setSize(600, 400);
@@ -105,7 +106,7 @@ public class MainFrame{
     {
         MainFrame frame = new MainFrame("2333");
         frame.Show();
-        MainFrameThread t = new MainFrameThread(frame);
+        //MainFrameThread t = new MainFrameThread(frame);
     }
 
     //设置按钮属性
@@ -116,9 +117,21 @@ public class MainFrame{
         startButton = new JButton("开始");
         pauseButton = new JButton("暂停");
         stopButton = new JButton("中止");
-        ButtonGroup dataMode = new ButtonGroup();
+        dataMode = new ButtonGroup();
         linkMode = new JRadioButton("仅使用关系文件");
+        linkMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectNodesFile.setEnabled(false);
+            }
+        });
         nodeMode = new JRadioButton("使用关系文件和节点文件");
+        nodeMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectNodesFile.setEnabled(true);
+            }
+        });
 
         pauseButton.setVisible(false);
         stopButton.setVisible(false);
@@ -175,7 +188,7 @@ public class MainFrame{
                 data_.linksFile = linksFile;
                 currentBar.setIndeterminate(true);
                 totalBar.setIndeterminate(true);
-                SwingWorker worker = new SwingWorker() {
+                SwingWorker<Object, Void> worker = new SwingWorker<>() {
                     @Override
                     protected Object doInBackground() throws Exception {
                         data_.LoadFile();
@@ -185,7 +198,6 @@ public class MainFrame{
                     }
                 };
                 worker.execute();
-                return;
             }
         }
     }
@@ -200,7 +212,6 @@ public class MainFrame{
             if(nodesFile.exists())
             {
                 nodesFilePath.setText(linksFile.toString());
-                return;
             }
         }
     }
@@ -229,11 +240,13 @@ public class MainFrame{
             stopButton.setVisible(true);
             selectLinksFile.setEnabled(false);
             selectNodesFile.setEnabled(false);
-            final SwingWorker worker = new SwingWorker() {
+            final SwingWorker<Object, Void> worker = new SwingWorker<>() {
                 @Override
                 protected Object doInBackground() throws Exception {
                     totalBar.setMaximum(data_.getMap().size());
+                    totalBar.setStringPainted(true);
                     currentBar.setIndeterminate(true);
+                    mc = new MainCalculate(mc.ui_);
                     mc.setData_(data_);
                     mc.start();
                     return null;
@@ -241,7 +254,6 @@ public class MainFrame{
             };
             worker.execute();
 
-            /*yummy*/
         }
     }
     class pauseButtonAL implements ActionListener
@@ -250,11 +262,15 @@ public class MainFrame{
         public void actionPerformed(ActionEvent e) {
             if (pauseButton.getText().equals("暂停")) {
                 pauseButton.setText("继续");
-                /*yummy*/
+
+                pauseButton.setEnabled(false);
+                data_.calculateState = 1;
             }
             else{
                 pauseButton.setText("暂停");
-                /*yummy*/
+
+                pauseButton.setEnabled(false);
+                data_.calculateState = 0;
             }
         }
     }
@@ -265,9 +281,16 @@ public class MainFrame{
             startButton.setVisible(true);
             pauseButton.setVisible(false);
             stopButton.setVisible(false);
-            selectLinksFile.setEnabled(true);
-            selectNodesFile.setEnabled(true);
-            /*yummy*/
+            if(dataMode.isSelected(linkMode.getModel()))
+            {
+                selectLinksFile.setEnabled(true);
+            }
+            else {
+                selectLinksFile.setEnabled(true);
+                selectNodesFile.setEnabled(true);
+            }
+
+            data_.calculateState = 2;
         }
     }
 }

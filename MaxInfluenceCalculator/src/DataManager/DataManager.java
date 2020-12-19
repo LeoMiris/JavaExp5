@@ -9,6 +9,7 @@ public class DataManager{
     //public File nodesFile = null;
     public int linksNum = 0;
     public Vector<String> linksFileRaw = new Vector<>();
+    public int calculateState = 0;  //1-pause; 2-stop
     //public Vector nodesFileRaw = new Vector();
     //public Queue<Integer> nodes = null; //Nodes will be here!
 
@@ -16,7 +17,9 @@ public class DataManager{
     {
     }
 
-    public int LoadFile()throws FileNotFoundException {
+    public void LoadFile()throws FileNotFoundException {
+        linksFileRaw = new Vector<>();
+        calculateState = 0;
         if(linksFile == null)
         {
             throw new FileNotFoundException();
@@ -38,8 +41,8 @@ public class DataManager{
                             break;  //EOF
                         }
                         pairs = str.split(" ");
-                        String strline = pairs[0] + " " + pairs[1] + " " + pairs[2] + " " + pairs[3];
-                        linksFileRaw.add(strline);
+                        String str_line = pairs[0] + " " + pairs[1] + " " + pairs[2] + " " + pairs[3];
+                        linksFileRaw.add(str_line);
                         linksNum++;
                     }
                 }
@@ -72,8 +75,6 @@ public class DataManager{
         });
         ReadFile.start();
 
-
-        return 0;
     }
 
     public synchronized HashMap<Integer, HashMapNode> getMap() throws FileNotFoundException {
@@ -83,11 +84,11 @@ public class DataManager{
         if (linksFileRaw == null)
             throw new FileNotFoundException();
         //int size = linksFileRaw.size();
-        String strline;
+        String str_line;
         String[] pairs;
         for (String s : linksFileRaw) {
-            strline = s;//.toString();
-            pairs = strline.split(" "); //!!!!!!!
+            str_line = s;//.toString();
+            pairs = str_line.split(" "); //!!!!!!!
             temp = new HashMapNode();
             temp.nodeKey = StringToInt(pairs[0]);
             adjTemp = new AdjNode();
@@ -101,15 +102,25 @@ public class DataManager{
                 temp.adjNode.add(adjTemp);
                 map.put(temp.nodeKey, temp);
             }
+            //添加邻接节点
+            if(!map.containsKey(adjTemp.adjNodeKey))
+            {
+                HashMapNode adjNodeTemp = new HashMapNode();
+                adjNodeTemp.nodeKey = adjTemp.adjNodeKey;
+                adjNodeTemp.activated = 0;
+                map.put(adjNodeTemp.nodeKey, adjNodeTemp);
+            }
         }
 
         return map;
     }
-public static void main(String[] args) throws FileNotFoundException {
+
+//Test code
+/*public static void main(String[] args) throws FileNotFoundException {
     DataManager dm = new DataManager();
     dm.linksFile = new File("C:\\Users\\Miris\\Desktop\\大作业相关文件\\links.txt");
     dm.LoadFile();
-}
+}*/
     public static int StringToInt(String str)
     {
         int value = 0;

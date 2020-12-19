@@ -6,10 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class JPanel_Ex extends JPanel {
-    public JPanel_Ex()
-    {
-        super();
-    }
+
     public JPanel_Ex(GridBagLayout GBL)
     {
         super(GBL);

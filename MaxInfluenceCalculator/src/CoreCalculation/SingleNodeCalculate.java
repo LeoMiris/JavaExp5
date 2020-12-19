@@ -12,9 +12,9 @@ public class SingleNodeCalculate extends Thread {
     public DataManager data_;
     public Integer key_;
     Set<Integer> keys;
-    public Vector final_result_;
+    public Vector<VectorNode> final_result_;
 
-    public SingleNodeCalculate(DataManager data, Vector final_result, Integer key)
+    public SingleNodeCalculate(DataManager data, Vector<VectorNode> final_result, Integer key)
     {
         data_ = data;
         try {
@@ -42,6 +42,10 @@ public class SingleNodeCalculate extends Thread {
         double influence = 0;
         for(int i=0; i<5000; i++)
         {
+            if(this.isInterrupted())
+            {
+                return;
+            }
             while(hm == null)
             {
                 try {
@@ -52,10 +56,10 @@ public class SingleNodeCalculate extends Thread {
                 }
             }
             //HashMap<Integer, HashMapNode> hm = data_.getMap();
-            Queue<HashMapNode> queue = new LinkedList<HashMapNode>();
+            Queue<HashMapNode> queue = new LinkedList<>();
             hm.get(key_).activated = 1;
             queue.offer(hm.get(key_));
-            double infl = 1;
+            double currentInfluence = 1;
             while(!queue.isEmpty())
             {
                 int k = queue.poll().nodeKey;
@@ -64,8 +68,7 @@ public class SingleNodeCalculate extends Thread {
                 {
                     if(hm.get(k).adjNode.get(j).direction == 1)
                     {
-                        if(hm.get(hm.get(k).adjNode.get(j).adjNodeKey) == null ||
-                                hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == 1
+                        if(hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == 1
                                 || hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == -1)
                             break;
                         else
@@ -73,7 +76,7 @@ public class SingleNodeCalculate extends Thread {
                             long real = DataManager.DecimalStringToLong(((Double)Math.random()).toString());
                             if(real >= hm.get(k).adjNode.get(j).possibility)
                             {
-                                infl++;
+                                currentInfluence++;
                                 hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated = 1;
                                 queue.offer(hm.get(hm.get(k).adjNode.get(j).adjNodeKey));
                             }
@@ -83,28 +86,23 @@ public class SingleNodeCalculate extends Thread {
                     }
                     else if(hm.get(k).adjNode.get(j).direction == -1)
                     {
-                        if(hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated == 0)
-                            break;
-                        else
+                        double real = Math.random();
+                        for(int a=0; a<17; a++)
                         {
-                            double real = Math.random();
-                            for(int a=0; a<17; a++)
-                            {
-                                real*=10;
-                            }
-                            if(real >= hm.get(k).adjNode.get(j).possibility)
-                            {
-                                //infl--;
-                                hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated = -1;
-                            }
-                            else
-                                break;
+                            real*=10;
                         }
+                        if(real >= hm.get(k).adjNode.get(j).possibility)
+                        {
+                            //currentInfluence--;
+                            hm.get(hm.get(k).adjNode.get(j).adjNodeKey).activated = -1;
+                        }
+                        else
+                            break;
                     }
                 }
             }
-            //System.out.println(infl);
-            influence = influence + (infl / 5000);
+            //System.out.println(currentInfluence);
+            influence = influence + (currentInfluence / 5000);
             RestoreMap();
         }
 

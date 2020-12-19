@@ -4,10 +4,13 @@ import DataManager.*;
 import UserInterface.MainFrame;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.JDialog;
 import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Comparator;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -16,10 +19,9 @@ public class MainCalculate extends Thread{
     public DataManager data_;
     public MainFrame ui_;
     public Vector<VectorNode> final_result = new Vector<>();
-    public Vector<Integer> final_keys = new Vector<>();
-    public Vector<Double> influency = new Vector<>();
     public int thread_num = 220;
     public int calculated = 0;
+    public int currentState = 0;
     public MainCalculate(MainFrame Ui)
     {
         ui_ = Ui;
@@ -29,14 +31,15 @@ public class MainCalculate extends Thread{
         data_ = data;
     }
 
-    @SuppressWarnings("InfiniteLoopStatement")
     public void run()
     {
         HashMap<Integer, HashMapNode> temp_map = null;
-        try {
-            temp_map = data_.getMap();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        while(temp_map == null) {
+            try {
+                temp_map = data_.getMap();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         Iterator<Integer> keys = temp_map.keySet().iterator();
         int key_num = temp_map.size();
@@ -48,15 +51,70 @@ public class MainCalculate extends Thread{
         }
         while(true)
         {
+            if(data_.calculateState != currentState)
+            {
+                //Pause
+                if(data_.calculateState == 1)
+                {
+                    for(int i = 0; i < thread_num; i++)
+                    {
+                        if(running_threads[i] != null && running_threads[i].isAlive()) {
+                            synchronized (running_threads[i]) {
+                                try {
+                                    running_threads[i].wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                    Runnable enableButton = () -> ui_.pauseButton.setEnabled(true);
+                    EventQueue.invokeLater(enableButton);
+                    currentState = 1;
+                    continue;
+                }
+                //Stop
+                else if(data_.calculateState == 2)
+                {
+                    for(int i = 0; i < thread_num; i++)
+                    {
+                        if(running_threads[i] != null)
+                                running_threads[i].interrupt();
+                    }
+                    currentState = 2;
+                    break;
+                }
+                else
+                {
+                    for(int i = 0; i < thread_num; i++)
+                    {
+                        if(running_threads[i] != null && running_threads[i].isAlive())
+                            synchronized (running_threads[i]) {
+                                running_threads[i].notify();
+                            }
+                    }
+                    Runnable enableButton = () -> ui_.pauseButton.setEnabled(true);
+                    EventQueue.invokeLater(enableButton);
+                    currentState = 0;
+                    continue;
+                }
+            }
+            if(currentState != 0) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             for(int j = 0; j < thread_num; j++)
             {
-                if(running_threads[j] == null || !running_threads[j].isAlive())
+                if(data_.calculateState == 0 && (running_threads[j] == null || !running_threads[j].isAlive()))
                 {
                     if(calculated >= key_num)
                     {
                         break;
                     }
-                    running_threads[j] = new SingleNodeCalculate(data_, final_result, (Integer)keys.next());
+                    running_threads[j] = new SingleNodeCalculate(data_, final_result, keys.next());
                     running_threads[j].start();
                     calculated++;
                 }
@@ -79,12 +137,9 @@ public class MainCalculate extends Thread{
                     }
                 });
             }*/
-            Runnable updateUi = new Runnable() {
-                @Override
-                public void run() {
-                    ui_.totalBar.setValue(calculated);
-                    //ui_.tableModel = new DefaultTableModel();
-                }
+            Runnable updateUi = () -> {
+                ui_.totalBar.setValue(calculated);
+                //ui_.tableModel = new DefaultTableModel();
             };
             EventQueue.invokeLater(updateUi);
 
@@ -106,24 +161,55 @@ public class MainCalculate extends Thread{
                     flag++;
         }
 
-        if(final_result.size() != 0) {
-            final_result.sort(new Comparator<VectorNode>() {
-                public int compare(VectorNode o1, VectorNode o2) {
-                    if ((o1).key_ > (o2).key_) {
-                        return 1;
-                    } else if ((o1).key_.equals((o2).key_)) {
-                        return 0;
-                    } else
-                        return -1;
-                }
-            });
+        if(currentState == 0) {
+            File fileTemp = new File("");
+            String fileName = fileTemp.getAbsolutePath();
+            fileName = fileName+"\\Result"+new Date().toString().replace(' ', '-').replace(':', '-')+".txt";
+            try {
+
+                    FileWriter writer = new FileWriter(fileName);
+                    for(VectorNode cur : final_result)
+                    {
+                        writer.write(cur.key_.toString()+" "+cur.influence_.toString()+"\n");
+                    }
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (final_result.size() != 0) {
+                final_result.sort((o1, o2) -> (o2).influence_.compareTo((o1).influence_));
+            }
+            JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
+            resultDialog.setLayout(new GridLayout(11, 2));
+            resultDialog.add(new JLabel("节点", JLabel.CENTER));
+            resultDialog.add(new JLabel("影响力", JLabel.CENTER));
+            for (int i = 0; i < 10 && i < final_result.size(); i++) {
+                resultDialog.add(new JLabel(final_result.get(i).key_.toString(), JLabel.CENTER));
+                resultDialog.add(new JLabel(final_result.get(i).influence_.toString(), JLabel.CENTER));
+            }
+            resultDialog.setSize(300, 400);
+            resultDialog.setLocationRelativeTo(ui_.frame);
+            resultDialog.setVisible(true);
         }
-        Runnable updateTable = new Runnable() {
-            @Override
-            public void run() {
-                ui_.tableModel.addRow(final_keys);
+
+        Runnable updateTable = () -> {
+            ui_.currentBar.setIndeterminate(false);
+            ui_.totalBar.setMaximum(100);
+            ui_.totalBar.setValue(0);
+            ui_.pauseButton.setVisible(false);
+            ui_.stopButton.setVisible(false);
+            ui_.startButton.setVisible(true);
+            if(ui_.dataMode.isSelected(ui_.linkMode.getModel()))
+            {
+                ui_.selectLinksFile.setEnabled(true);
+            }
+            else {
+                ui_.selectLinksFile.setEnabled(true);
+                ui_.selectNodesFile.setEnabled(true);
             }
         };
         EventQueue.invokeLater(updateTable);
+        data_.calculateState = 0;
+        currentState = 0;
     }
 }
