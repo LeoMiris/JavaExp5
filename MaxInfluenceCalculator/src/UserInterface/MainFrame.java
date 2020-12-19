@@ -104,7 +104,7 @@ public class MainFrame{
     //main函数，也许它会一直在这里
     public static void main(String[]args)
     {
-        MainFrame frame = new MainFrame("2333");
+        MainFrame frame = new MainFrame("Influence Calculator");
         frame.Show();
         //MainFrameThread t = new MainFrameThread(frame);
     }
@@ -119,19 +119,9 @@ public class MainFrame{
         stopButton = new JButton("中止");
         dataMode = new ButtonGroup();
         linkMode = new JRadioButton("仅使用关系文件");
-        linkMode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectNodesFile.setEnabled(false);
-            }
-        });
+        linkMode.addActionListener(e -> selectNodesFile.setEnabled(false));
         nodeMode = new JRadioButton("使用关系文件和节点文件");
-        nodeMode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectNodesFile.setEnabled(true);
-            }
-        });
+        nodeMode.addActionListener(e -> selectNodesFile.setEnabled(true));
 
         pauseButton.setVisible(false);
         stopButton.setVisible(false);
