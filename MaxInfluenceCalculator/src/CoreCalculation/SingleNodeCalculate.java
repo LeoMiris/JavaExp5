@@ -108,6 +108,6 @@ public class SingleNodeCalculate extends Thread {
 
         final_result_.add(new VectorNode(influence, key_));
         //final_result_.add(influence, key_);
-        System.out.println("节点" + key_ + "的最大影响力为" + influence);
+        //System.out.println("节点" + key_ + "的最大影响力为" + influence);
     }
 }

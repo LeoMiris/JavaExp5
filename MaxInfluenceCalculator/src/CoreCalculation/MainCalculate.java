@@ -162,6 +162,9 @@ public class MainCalculate extends Thread{
         }
 
         if(currentState == 0) {
+            if (final_result.size() != 0) {
+                final_result.sort((o1, o2) -> (o2).influence_.compareTo((o1).influence_));
+            }
             File fileTemp = new File("");
             String fileName = fileTemp.getAbsolutePath();
             fileName = fileName+"\\Result"+new Date().toString().replace(' ', '-').replace(':', '-')+".txt";
@@ -175,9 +178,6 @@ public class MainCalculate extends Thread{
                 writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-            if (final_result.size() != 0) {
-                final_result.sort((o1, o2) -> (o2).influence_.compareTo((o1).influence_));
             }
             JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
             resultDialog.setLayout(new GridLayout(11, 2));
