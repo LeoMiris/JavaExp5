@@ -63,20 +63,22 @@ public class MainCalculate extends Thread{
                     ui_.totalBar.setValue(finalI + 1);
                 };
                 EventQueue.invokeLater(updateTotal);
-
+                final_result.removeAllElements();
                 int nodeKey = SingleCalculate();
                 if(nodeKey == -1)
                     return;
                 setElem.add(nodeKey);
                 if(Objects.equals(ui_.calculationAccuracy.getSelectedItem(), "智能优化")) {
-                    for (int j = 0; j < nodeNum - 20 && j < final_result.size() * 0.8; j++) {
+                    for (int j = 0; j < nodeNum - skipNode.size() - 20 && j < final_result.size() * 0.8; j++) {
                         skipNode.add(final_result.get(final_result.size() - j - 1).key_);
                     }
                 }
                 else if(Objects.equals(ui_.calculationAccuracy.getSelectedItem(), "最小"))
                 {
-                    if(skipNode.size() > 0)
+                    if(skipNode.size() > 0) {
+                        keys = temp_map.keySet().iterator();
                         continue;
+                    }
                     for(int j = 0; j < final_result.size() - 20; j++)
                     {
                         if(skipNode.size() >= nodeNum - 20)
@@ -84,59 +86,54 @@ public class MainCalculate extends Thread{
                         skipNode.add(final_result.get(final_result.size() - j -1).key_);
                     }
                 }
+                keys = temp_map.keySet().iterator();
+
             }
 
-            File fileTemp = new File("");
-            String fileName = fileTemp.getAbsolutePath();
-            fileName = fileName+"\\Result"+new Date().toString().replace(' ', '-').replace(':', '-')+".txt";
-            try {
+            {
+                File fileTemp = new File("");
+                String fileName = fileTemp.getAbsolutePath();
+                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                try {
 
-                FileWriter writer = new FileWriter(fileName);
-                for(Integer cur : setElem)
-                {
-                    writer.write(cur + "\n");
+                    FileWriter writer = new FileWriter(fileName);
+                    for (Integer cur : setElem) {
+                        writer.write(cur + "\n");
+                    }
+                    writer.write("Total nfluence: " + final_result.get(0).influence_);
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                writer.write("Total nfluence: " + final_result.get(0).influence_);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
-            resultDialog.setLayout(new GridLayout(7, 2));
-            resultDialog.add(new JLabel("节点", JLabel.CENTER));
-            resultDialog.add(new JLabel("", JLabel.CENTER));
+                JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
+                resultDialog.setLayout(new GridLayout(7, 2));
+                resultDialog.add(new JLabel("节点", JLabel.CENTER));
+                resultDialog.add(new JLabel("", JLabel.CENTER));
 
-            for (Integer i : setElem) {
-                resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                for (Integer i : setElem) {
+                    resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                }
+                resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
+                resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
+                resultDialog.setSize(300, 400);
+                resultDialog.setLocationRelativeTo(ui_.frame);
+                resultDialog.setVisible(true);
             }
-            resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
-            resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
-            resultDialog.setSize(300, 400);
-            resultDialog.setLocationRelativeTo(ui_.frame);
-            resultDialog.setVisible(true);
 
         }
-        else if(mode == 2)
-        {
+        else if(mode == 2) {
             HashMap<Integer, HashMapNode> map = data_.getMap();
             Set<Integer> keySet = map.keySet();
-            for(Integer i : keySet) {
-                if (nodeDegree.containsKey(i))
-                {
-                    nodeDegree.get(i).activated+=map.get(i).adjNode.size();
-                }
-                else
-                {
+            for (Integer i : keySet) {
+                if (nodeDegree.containsKey(i)) {
+                    nodeDegree.get(i).activated += map.get(i).adjNode.size();
+                } else {
                     nodeDegree.put(i, new HashMapNode(i, map.get(i).adjNode.size()));
                 }
-                for(AdjNode adjNode : map.get(i).adjNode)
-                {
-                    if(nodeDegree.containsKey(adjNode.adjNodeKey))
-                    {
+                for (AdjNode adjNode : map.get(i).adjNode) {
+                    if (nodeDegree.containsKey(adjNode.adjNodeKey)) {
                         nodeDegree.get(adjNode.adjNodeKey).activated++;
-                    }
-                    else
-                    {
+                    } else {
                         nodeDegree.put(adjNode.adjNodeKey, new HashMapNode(adjNode.adjNodeKey, 1));
                     }
                 }
@@ -151,47 +148,48 @@ public class MainCalculate extends Thread{
             Vector<Integer> key = new Vector<>();
             //for(HashMapNode node : degreeResult)
             //{
-                //if(key.size() >= 10)
-                    //break;
-                key.add(degreeResult.get(0).nodeKey);
-                keys = key.iterator();
+            //if(key.size() >= 10)
+            //break;
+            key.add(degreeResult.get(0).nodeKey);
+            keys = key.iterator();
             //}
             key_num = 1;
-            for(int i = 0; i < 10; i++)
-            {
+            for (int i = 0; i < 10; i++) {
                 setElem.add(degreeResult.get(i).nodeKey);
             }
 
             SingleCalculate();
 
-            File fileTemp = new File("");
-            String fileName = fileTemp.getAbsolutePath();
-            fileName = fileName+"\\Result"+new Date().toString().replace(' ', '-').replace(':', '-')+".txt";
-            try {
 
-                FileWriter writer = new FileWriter(fileName);
-                for(Integer cur : setElem)
-                {
-                    writer.write(cur + "\n");
+            {
+                File fileTemp = new File("");
+                String fileName = fileTemp.getAbsolutePath();
+                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                try {
+
+                    FileWriter writer = new FileWriter(fileName);
+                    for (Integer cur : setElem) {
+                        writer.write(cur + "\n");
+                    }
+                    writer.write("Total nfluence: " + final_result.get(0).influence_);
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                writer.write("Total nfluence: " + final_result.get(0).influence_);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
-            resultDialog.setLayout(new GridLayout(7, 2));
-            resultDialog.add(new JLabel("节点", JLabel.CENTER));
-            resultDialog.add(new JLabel("", JLabel.CENTER));
+                JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
+                resultDialog.setLayout(new GridLayout(7, 2));
+                resultDialog.add(new JLabel("节点", JLabel.CENTER));
+                resultDialog.add(new JLabel("", JLabel.CENTER));
 
-            for (Integer i : setElem) {
-                resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                for (Integer i : setElem) {
+                    resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                }
+                resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
+                resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
+                resultDialog.setSize(300, 400);
+                resultDialog.setLocationRelativeTo(ui_.frame);
+                resultDialog.setVisible(true);
             }
-            resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
-            resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
-            resultDialog.setSize(300, 400);
-            resultDialog.setLocationRelativeTo(ui_.frame);
-            resultDialog.setVisible(true);
 
         }
         else if(mode == 3)
@@ -224,34 +222,35 @@ public class MainCalculate extends Thread{
 
             SingleCalculate();
 
-            File fileTemp = new File("");
-            String fileName = fileTemp.getAbsolutePath();
-            fileName = fileName+"\\Result"+new Date().toString().replace(' ', '-').replace(':', '-')+".txt";
-            try {
+            {
+                File fileTemp = new File("");
+                String fileName = fileTemp.getAbsolutePath();
+                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                try {
 
-                FileWriter writer = new FileWriter(fileName);
-                for(Integer cur : setElem)
-                {
-                    writer.write(cur + "\n");
+                    FileWriter writer = new FileWriter(fileName);
+                    for (Integer cur : setElem) {
+                        writer.write(cur + "\n");
+                    }
+                    writer.write("Total nfluence: " + final_result.get(0).influence_);
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                writer.write("Total nfluence: " + final_result.get(0).influence_);
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
-            resultDialog.setLayout(new GridLayout(7, 2));
-            resultDialog.add(new JLabel("节点", JLabel.CENTER));
-            resultDialog.add(new JLabel("", JLabel.CENTER));
+                JDialog resultDialog = new JDialog(ui_.frame, "计算结果", true);
+                resultDialog.setLayout(new GridLayout(7, 2));
+                resultDialog.add(new JLabel("节点", JLabel.CENTER));
+                resultDialog.add(new JLabel("", JLabel.CENTER));
 
-            for (Integer i : setElem) {
-                resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                for (Integer i : setElem) {
+                    resultDialog.add(new JLabel(i.toString(), JLabel.CENTER));
+                }
+                resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
+                resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
+                resultDialog.setSize(300, 400);
+                resultDialog.setLocationRelativeTo(ui_.frame);
+                resultDialog.setVisible(true);
             }
-            resultDialog.add(new JLabel("总影响力", JLabel.CENTER));
-            resultDialog.add(new JLabel(final_result.get(0).influence_.toString(), JLabel.CENTER));
-            resultDialog.setSize(300, 400);
-            resultDialog.setLocationRelativeTo(ui_.frame);
-            resultDialog.setVisible(true);
         }
 
         //结束

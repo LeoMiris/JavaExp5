@@ -30,7 +30,6 @@ public class MainFrame{
     public JRadioButton nodeDegreeMode;
     public JRadioButton nodeOutDegreeMode;
     public JComboBox<String> calculationAccuracy = new JComboBox<>();
-    private JLabel linkFilePath;
     private JLabel currentProcess;
     private JLabel totalProcess;
 
@@ -217,7 +216,7 @@ public class MainFrame{
         linksFilePath = new JTextField();
         currentBar = new JProgressBar();
         totalBar = new JProgressBar();
-        linkFilePath = new JLabel("关系文件路径", JLabel.CENTER);
+        JLabel linkFilePath = new JLabel("关系文件路径", JLabel.CENTER);
         currentProcess = new JLabel("当前操作进度", JLabel.CENTER);
         totalProcess = new JLabel("总体操作进度", JLabel.CENTER);
 
@@ -266,6 +265,10 @@ public class MainFrame{
     {
         @Override
         public void actionPerformed(ActionEvent e) {
+            if(linksFile == null)
+            {
+                return;
+            }
             startButton.setEnabled(false);
             pauseButton.setEnabled(true);
             stopButton.setEnabled(true);
