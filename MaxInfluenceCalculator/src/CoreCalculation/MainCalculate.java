@@ -94,7 +94,7 @@ public class MainCalculate extends Thread{
             {
                 File fileTemp = new File("");
                 String fileName = fileTemp.getAbsolutePath();
-                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                fileName = fileName + "\\Result-greedy-" + mode + "-" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
                 try {
 
                     FileWriter writer = new FileWriter(fileName);
@@ -165,7 +165,7 @@ public class MainCalculate extends Thread{
             {
                 File fileTemp = new File("");
                 String fileName = fileTemp.getAbsolutePath();
-                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                fileName = fileName + "\\Result-"  + mode + "-" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
                 try {
 
                     FileWriter writer = new FileWriter(fileName);
@@ -226,7 +226,7 @@ public class MainCalculate extends Thread{
             {
                 File fileTemp = new File("");
                 String fileName = fileTemp.getAbsolutePath();
-                fileName = fileName + "\\Result" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
+                fileName = fileName + "\\Result-"  + mode + "-" + new Date().toString().replace(' ', '-').replace(':', '-') + ".txt";
                 try {
 
                     FileWriter writer = new FileWriter(fileName);

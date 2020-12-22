@@ -81,7 +81,7 @@ public class SingleNodeCalculate extends Thread {
         }
         //System.out.println(t1.getTime() - new Date().getTime());
         final_result_.add(new VectorNode(influence/5000, key_));
-        System.out.println("节点" + key_ + "的最大影响力为" + influence/5000);
+        //System.out.println("节点" + key_ + "的最大影响力为" + influence/5000);
 
     }
 }
