@@ -4,6 +4,7 @@ import CoreCalculation.MainCalculate;
 import DataManager.DataManager;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,23 +16,21 @@ public class MainFrame{
     public JFrame frame;
     //实例化的组件们，便于更新UI
     public File linksFile;
-    public File nodesFile;
     public JProgressBar currentBar;
     public JProgressBar totalBar;
     public JTable influenceList;
     public DefaultTableModel tableModel;
     protected JTextField linksFilePath;
-    protected JTextField nodesFilePath;
     public JButton selectLinksFile;
-    public JButton selectNodesFile;
     public JButton startButton;
     public JButton pauseButton;
     public JButton stopButton;
-    public ButtonGroup dataMode;
-    public JRadioButton linkMode;
-    public JRadioButton nodeMode;
+    public ButtonGroup calcMode;
+    public JRadioButton greedyMode;
+    public JRadioButton nodeDegreeMode;
+    public JRadioButton nodeOutDegreeMode;
+    public JComboBox<String> calculationAccuracy = new JComboBox<>();
     private JLabel linkFilePath;
-    private JLabel nodeFilePath;
     private JLabel currentProcess;
     private JLabel totalProcess;
 
@@ -52,7 +51,7 @@ public class MainFrame{
     public void Show()
     {
 
-        JPanel_Ex workControl = new JPanel_Ex(new GridBagLayout()); //网袋布局
+        /*JPanel_Ex workControl = new JPanel_Ex(new GridBagLayout()); //网袋布局
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.anchor = GridBagConstraints.CENTER;
@@ -75,7 +74,8 @@ public class MainFrame{
         workControl.add(linkFilePath, constraints, 0,0,1,1);
         workControl.add(nodeFilePath, constraints,0,1,1,1);
         workControl.add(currentProcess, constraints, 3, 2,1,2);
-        workControl.add(totalProcess, constraints, 3,4,1,2);
+        workControl.add(totalProcess, constraints, 3,4,1,2);*/
+
 
 
         //JPanel listPanel = new JPanel();
@@ -91,10 +91,62 @@ public class MainFrame{
 
         //frame.setLayout(new GridLayout(1, 2));
         //frame.getContentPane().add(workControl);
-        frame.getContentPane().add(workControl);
+        frame = new JFrame("Influence Calculator");
+        JPanel fileSelect = new JPanel();
+
+        fileSelect.setLayout(new FlowLayout(FlowLayout.CENTER, 5,10));
+        fileSelect.add(new JLabel("关系文件路径", JLabel.RIGHT));
+        linksFilePath.setColumns(30);
+        fileSelect.add(linksFilePath);
+        fileSelect.add(selectLinksFile);
+        fileSelect.setBackground(Color.lightGray);
+        fileSelect.setBorder(new LineBorder(Color.black));
+
+        JPanel workControl = new JPanel();
+        BorderLayout layout = new BorderLayout(20, 10);
+        workControl.setLayout(layout);
+        JPanel radioButtons = new JPanel();
+        radioButtons.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        radioButtons.add(greedyMode);
+        radioButtons.add(nodeDegreeMode);
+        radioButtons.add(nodeOutDegreeMode);
+        radioButtons.setBackground(new Color(0xd9e1e8));
+
+        JPanel progressPanel = new JPanel();
+        progressPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 20));
+        progressPanel.add(currentBar);
+        progressPanel.add(currentProcess);
+        progressPanel.add(totalBar);
+        progressPanel.add(totalProcess);
+
+        progressPanel.setBackground(new Color(0xfbfdfe));
+
+        JPanel controlPanel = new JPanel();
+        GridBagLayout layout1 = new GridBagLayout();
+        //layout1.setConstraints(new GridBagConstraints());
+        calculationAccuracy.addItem("智能优化");
+        calculationAccuracy.addItem("全部");
+        calculationAccuracy.addItem("最小");
+        controlPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 50));
+        controlPanel.add(calculationAccuracy);
+        controlPanel.add(pauseButton);
+        controlPanel.add(stopButton);
+        controlPanel.add(startButton);
+
+        controlPanel.setBackground(new Color(0xfbfdfe));
+
+        workControl.setBackground(new Color(0xfbfdfe));
+        workControl.add(radioButtons, BorderLayout.NORTH);
+        workControl.add(progressPanel, BorderLayout.CENTER);
+        workControl.add(controlPanel, BorderLayout.EAST);
+
+        frame.add(fileSelect, BorderLayout.NORTH);
+        frame.add(workControl, BorderLayout.CENTER);
+        //frame.add(fileSelect);
         //frame.getContentPane().add(listPanel, BorderLayout.CENTER);
 
-        frame.setSize(600, 400);
+        frame.setSize(600, 300);
+        frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -104,7 +156,7 @@ public class MainFrame{
     //main函数，也许它会一直在这里
     public static void main(String[]args)
     {
-        MainFrame frame = new MainFrame("Influence Calculator");
+        MainFrame frame = new MainFrame("2333");
         frame.Show();
         //MainFrameThread t = new MainFrameThread(frame);
     }
@@ -113,27 +165,49 @@ public class MainFrame{
     protected void setButtons()
     {
         selectLinksFile = new JButton("选择关系文件");
-        selectNodesFile = new JButton("选择结点文件");
         startButton = new JButton("开始");
         pauseButton = new JButton("暂停");
         stopButton = new JButton("中止");
-        dataMode = new ButtonGroup();
-        linkMode = new JRadioButton("仅使用关系文件");
-        linkMode.addActionListener(e -> selectNodesFile.setEnabled(false));
-        nodeMode = new JRadioButton("使用关系文件和节点文件");
-        nodeMode.addActionListener(e -> selectNodesFile.setEnabled(true));
+        calcMode = new ButtonGroup();
+        greedyMode = new JRadioButton("贪心算法");
+        nodeDegreeMode = new JRadioButton("结点度数优先");
+        nodeOutDegreeMode = new JRadioButton("结点出度优先");
 
-        pauseButton.setVisible(false);
-        stopButton.setVisible(false);
-        dataMode.add(linkMode);
-        dataMode.add(nodeMode);
-        linkMode.setSelected(true);
-        selectNodesFile.setEnabled(false);
+        greedyMode.setBackground(new Color(0x9baec8));
+        nodeDegreeMode.setBackground(new Color(0xd9e1e8));
+        nodeOutDegreeMode.setBackground(new Color(0xd9e1e8));
+        greedyMode.addActionListener(e -> {
+            calculationAccuracy.setEnabled(true);
+            greedyMode.setBackground(new Color(0x9baec8));
+            nodeDegreeMode.setBackground(new Color(0xd9e1e8));
+            nodeOutDegreeMode.setBackground(new Color(0xd9e1e8));
+        });
+        nodeDegreeMode.addActionListener(e -> {
+            calculationAccuracy.setEnabled(false);
+            nodeDegreeMode.setBackground(new Color(0x9baec8));
+            greedyMode.setBackground(new Color(0xd9e1e8));
+            nodeOutDegreeMode.setBackground(new Color(0xd9e1e8));
+        });
+        nodeOutDegreeMode.addActionListener(e -> {
+            calculationAccuracy.setEnabled(false);
+            nodeOutDegreeMode.setBackground(new Color(0x9baec8));
+            greedyMode.setBackground(new Color(0xd9e1e8));
+            nodeDegreeMode.setBackground(new Color(0xd9e1e8));
+        });
+
+        calcMode.add(greedyMode);
+        calcMode.add(nodeDegreeMode);
+        calcMode.add(nodeOutDegreeMode);
+        greedyMode.setSelected(true);
+
+        pauseButton.setEnabled(false);
+        stopButton.setEnabled(false);
+
 
         selectLinksFile.addActionListener(new selectLinksFileAL());
-        selectNodesFile.addActionListener(new selectNodesFileAL());
-        linkMode.addActionListener(new linkModeAL());
-        nodeMode.addActionListener(new nodeModeAL());
+        startButton.addActionListener(new startButtonAL());
+        pauseButton.addActionListener(new pauseButtonAL());
+        stopButton.addActionListener(new stopButtonAL());
     }
 
     //设置界面上的文本
@@ -141,11 +215,9 @@ public class MainFrame{
     {
         influenceList = new JTable();
         linksFilePath = new JTextField();
-        nodesFilePath = new JTextField();
         currentBar = new JProgressBar();
         totalBar = new JProgressBar();
         linkFilePath = new JLabel("关系文件路径", JLabel.CENTER);
-        nodeFilePath = new JLabel("节点文件路径", JLabel.CENTER);
         currentProcess = new JLabel("当前操作进度", JLabel.CENTER);
         totalProcess = new JLabel("总体操作进度", JLabel.CENTER);
 
@@ -156,11 +228,7 @@ public class MainFrame{
         influenceList.setModel(tableModel);
         influenceList.setMinimumSize(new Dimension(400,400));
         linksFilePath.setEditable(false);
-        nodesFilePath.setEditable(false);
-        nodesFilePath.setEnabled(false);
-        startButton.addActionListener(new startButtonAL());
-        pauseButton.addActionListener(new pauseButtonAL());
-        stopButton.addActionListener(new stopButtonAL());
+
     }
 
     //组件的事件相应函数
@@ -191,54 +259,42 @@ public class MainFrame{
             }
         }
     }
-    class selectNodesFileAL implements ActionListener
-    {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JFileChooser nodesFileChooser = new JFileChooser();
-            nodesFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            nodesFileChooser.showDialog(new Label(), "选择关系数据文件");
-            nodesFile = nodesFileChooser.getSelectedFile();
-            if(nodesFile.exists())
-            {
-                nodesFilePath.setText(linksFile.toString());
-            }
-        }
-    }
-    class linkModeAL implements ActionListener
-    {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            selectNodesFile.setEnabled(false);
-            nodesFilePath.setEnabled(false);
-        }
-    }
-    class nodeModeAL implements ActionListener
-    {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            selectNodesFile.setEnabled(true);
-            nodesFilePath.setEnabled(true);
-        }
-    }
+
+
+
     class startButtonAL implements ActionListener
     {
         @Override
         public void actionPerformed(ActionEvent e) {
-            startButton.setVisible(false);
-            pauseButton.setVisible(true);
-            stopButton.setVisible(true);
+            startButton.setEnabled(false);
+            pauseButton.setEnabled(true);
+            stopButton.setEnabled(true);
             selectLinksFile.setEnabled(false);
-            selectNodesFile.setEnabled(false);
+
             final SwingWorker<Object, Void> worker = new SwingWorker<>() {
                 @Override
-                protected Object doInBackground() throws Exception {
-                    totalBar.setMaximum(data_.getMap().size());
+                protected Object doInBackground() {
+                    data_.calculateState = 0;
+                    //totalBar.setMaximum(data_.getMap().size());
                     totalBar.setStringPainted(true);
-                    currentBar.setIndeterminate(true);
-                    mc = new MainCalculate(mc.ui_);
-                    mc.setData_(data_);
-                    mc.start();
+                    currentBar.setStringPainted(true);
+                    if(calcMode.isSelected(greedyMode.getModel())) {
+                        mc = new MainCalculate(mc.ui_, 1);
+                        mc.setData_(data_);
+                        mc.start();
+                    }
+                    else if(calcMode.isSelected(nodeDegreeMode.getModel()))
+                    {
+                        mc = new MainCalculate(mc.ui_, 2);
+                        mc.setData_(data_);
+                        mc.start();
+                    }
+                    else if(calcMode.isSelected(nodeOutDegreeMode.getModel()))
+                    {
+                        mc = new MainCalculate(mc.ui_, 3);
+                        mc.setData_(data_);
+                        mc.start();
+                    }
                     return null;
                 }
             };
@@ -268,17 +324,10 @@ public class MainFrame{
     {
         @Override
         public void actionPerformed(ActionEvent e) {
-            startButton.setVisible(true);
-            pauseButton.setVisible(false);
-            stopButton.setVisible(false);
-            if(dataMode.isSelected(linkMode.getModel()))
-            {
-                selectLinksFile.setEnabled(true);
-            }
-            else {
-                selectLinksFile.setEnabled(true);
-                selectNodesFile.setEnabled(true);
-            }
+            startButton.setEnabled(true);
+            pauseButton.setEnabled(false);
+            stopButton.setEnabled(false);
+
 
             data_.calculateState = 2;
         }

@@ -2,6 +2,7 @@ package DataManager;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Vector;
 
 public class DataManager{
@@ -10,6 +11,7 @@ public class DataManager{
     public int linksNum = 0;
     public Vector<String> linksFileRaw = new Vector<>();
     public int calculateState = 0;  //1-pause; 2-stop
+    public HashMap<Integer, HashMapNode> map = new HashMap<>();
     //public Vector nodesFileRaw = new Vector();
     //public Queue<Integer> nodes = null; //Nodes will be here!
 
@@ -72,12 +74,39 @@ public class DataManager{
                     e.printStackTrace();
                 }
             }
+            try {
+                map = getMap("");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         });
         ReadFile.start();
 
     }
 
-    public synchronized HashMap<Integer, HashMapNode> getMap() throws FileNotFoundException {
+    public synchronized HashMap<Integer, HashMapNode> getMap() throws NullPointerException
+    {
+        if(map == null)
+        {
+            throw new NullPointerException();
+        }
+        Set<Integer> keys = map.keySet();
+        HashMap<Integer, HashMapNode> newMap = new HashMap<>();
+        HashMapNode tempNode;
+        for(Integer currentKey : keys)
+        {
+            tempNode = new HashMapNode();
+            tempNode.nodeKey = currentKey;
+            for(AdjNode currentAdjNode : map.get(currentKey).adjNode)
+            {
+                tempNode.adjNode.add(new AdjNode(currentAdjNode.adjNodeKey, currentAdjNode.direction, currentAdjNode.possibility));
+            }
+            newMap.put(currentKey, tempNode);
+        }
+
+        return newMap;
+    }
+    public synchronized HashMap<Integer, HashMapNode> getMap(String str) throws FileNotFoundException {
         HashMap<Integer, HashMapNode> map = new HashMap<>();
         HashMapNode temp;
         AdjNode adjTemp;
@@ -94,7 +123,7 @@ public class DataManager{
             adjTemp = new AdjNode();
             adjTemp.adjNodeKey = StringToInt(pairs[1]);
             adjTemp.direction = (pairs[2].equals("-1")) ? -1 : 1;
-            adjTemp.possibility = DecimalStringToLong(pairs[3]);
+            adjTemp.possibility = Double.parseDouble(pairs[3]);//DecimalStringToLong(pairs[3]);
             if (map.containsKey(temp.nodeKey)) {
                 HashMapNode temp2temp = /*(HashMapNode)*/ map.get(temp.nodeKey);
                 temp2temp.adjNode.add(adjTemp);

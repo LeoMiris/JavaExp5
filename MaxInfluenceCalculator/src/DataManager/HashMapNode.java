@@ -11,4 +11,20 @@ public class HashMapNode {
     {
         adjNode = new Vector<>();
     }
+    public HashMapNode(int _nodeKey, int _activated)
+    {
+        nodeKey = _nodeKey;
+        activated = _activated;
+    }
+
+    public HashMapNode setActivated()
+    {
+        activated = 1;
+        return this;
+    }
+    public HashMapNode setDeactivated()
+    {
+        activated = -1;
+        return this;
+    }
 }
