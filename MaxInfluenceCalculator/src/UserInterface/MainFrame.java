@@ -144,7 +144,7 @@ public class MainFrame{
         //frame.add(fileSelect);
         //frame.getContentPane().add(listPanel, BorderLayout.CENTER);
 
-        frame.setSize(600, 300);
+        frame.setSize(600, 330);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

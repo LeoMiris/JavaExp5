@@ -69,7 +69,8 @@ public class MainCalculate extends Thread{
                     return;
                 setElem.add(nodeKey);
                 if(Objects.equals(ui_.calculationAccuracy.getSelectedItem(), "智能优化")) {
-                    for (int j = 0; j < nodeNum - skipNode.size() - 20 && j < final_result.size() * 0.8; j++) {
+                    int exist = skipNode.size();
+                    for (int j = 0; j < nodeNum - exist - 20 && j < final_result.size() * 0.8; j++) {
                         skipNode.add(final_result.get(final_result.size() - j - 1).key_);
                     }
                 }
